@@ -1,59 +1,74 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from "react-native";
+import CounterButton from "./CounterButton";
 
-type StudentCardProps = {
+type Props = {
   name: string;
-  description: string;
-  photo: string;
+  role: string;
+  img: string;
+  desc: string;
+  button?: string;
+  btnStep?: number;
 };
 
 export default function StudentCard({
   name,
-  description,
-  photo,
-}: StudentCardProps) {
+  role,
+  img,
+  desc,
+  button = "Follow",
+  btnStep = 1,
+}: Props) {
   return (
     <View style={styles.card}>
-      <Image source={{ uri: photo }} style={styles.image} />
-
-      <View style={styles.info}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.description}>{description}</Text>
+      <View style={styles.header}>
+        <Image source={{ uri: img }} style={styles.avatar} />
+        <View>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.role}>{role}</Text>
+        </View>
       </View>
+
+      <Image source={{ uri: img }} style={styles.postImage} />
+
+      <Text style={styles.desc}>
+        <Text style={{ fontWeight: "bold" }}>{name} </Text>
+        {desc}
+      </Text>
+
+      <CounterButton title={button} step={btnStep} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    alignItems: 'center',
-    marginVertical: 8,
-    elevation: 3, // Android
-    shadowColor: '#000', // iOS
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+    backgroundColor: "#fff",
+    marginBottom: 20,
+    borderRadius: 20,
   },
-  image: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginRight: 16,
-    backgroundColor: '#eee',
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
   },
-  info: {
-    flex: 1,
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
   },
   name: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "bold",
   },
-  description: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
+  role: {
+    color: "gray",
+    fontSize: 12,
+  },
+  postImage: {
+    width: "100%",
+    height: 350,
+  },
+  desc: {
+    padding: 10,
   },
 });
