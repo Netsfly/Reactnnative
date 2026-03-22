@@ -1,8 +1,6 @@
-import TodoItem from "@/src/components/TodoItem";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Button,
   FlatList,
   StyleSheet,
@@ -10,71 +8,66 @@ import {
   TextInput,
   View,
 } from "react-native";
+import TodoItem from "../components/TodoItem";
 import {
   createTodo,
   deleteTodo,
   getTodos,
   updateTodo,
-} from "../../services/todoApi";
-import { Todo } from "../../types/todo";
+} from "../services/todoApi";
+import { Todo } from "../types/todo";
 
-export default function HomeScreen() {
+export default function TodoScreen() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [text, setText] = useState("");
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
-  const [submitting, setSubmitting] = useState(false); // блокировка кнопки
 
-  // Получение списка
+  // Получение списка задач
   const fetchTodos = async () => {
     try {
-      setLoading(true);
       const data = await getTodos();
       setTodos(data);
     } catch (error) {
       console.log(error);
-      Alert.alert("Ошибка", "Не удалось загрузить задачи");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
   // Создание новой задачи
   const handleCreate = async () => {
     if (!text.trim()) return;
     try {
-      setSubmitting(true);
       const newTodo = await createTodo(text);
       setTodos((prev) => [newTodo, ...prev]);
       setText("");
     } catch (error) {
       console.log(error);
-      Alert.alert("Ошибка", "Не удалось создать задачу");
-    } finally {
-      setSubmitting(false);
     }
   };
 
-  // Начало редактирования
+  // Нажатие Edit
   const handleEdit = (todo: Todo) => {
     setEditingTodo(todo);
     setText(todo.todo_text);
   };
 
-  // Обновление задачи
+  // Обновление существующей задачи
   const handleUpdate = async () => {
     if (!editingTodo || !text.trim()) return;
     try {
-      setSubmitting(true);
       const updated = await updateTodo(editingTodo.id, text);
       setTodos((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
       setEditingTodo(null);
       setText("");
     } catch (error) {
       console.log(error);
-      Alert.alert("Ошибка", "Не удалось обновить задачу");
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -85,13 +78,8 @@ export default function HomeScreen() {
       setTodos((prev) => prev.filter((t) => t.id !== id));
     } catch (error) {
       console.log(error);
-      Alert.alert("Ошибка", "Не удалось удалить задачу");
     }
   };
-
-  useEffect(() => {
-    fetchTodos();
-  }, []);
 
   if (loading) {
     return (
@@ -103,6 +91,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Ввод текста */}
       <TextInput
         placeholder="Enter note..."
         value={text}
@@ -110,12 +99,14 @@ export default function HomeScreen() {
         style={styles.input}
       />
 
-      <Button
-        title={editingTodo ? "Update note" : "Create new note"}
-        onPress={editingTodo ? handleUpdate : handleCreate}
-        disabled={submitting || !text.trim()}
-      />
+      {/* Кнопка создания или обновления */}
+      {editingTodo ? (
+        <Button title="Update note" onPress={handleUpdate} />
+      ) : (
+        <Button title="Create new note" onPress={handleCreate} />
+      )}
 
+      {/* Список задач */}
       <FlatList
         data={todos}
         keyExtractor={(item) => item.id.toString()}
@@ -130,12 +121,19 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   input: {
     borderWidth: 1,
     padding: 10,
-    marginBottom: 10,
     borderRadius: 8,
+    marginBottom: 10,
   },
 });
